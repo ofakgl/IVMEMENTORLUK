@@ -133,8 +133,14 @@
             messageBox.style.display = 'block';
             if (response.ok && result.success) {
                 messageBox.className = 'success';
-                messageBox.innerText = result.message;
-                document.getElementById('step2Form').style.display = 'none'; // İşlem tamamen bitince formu gizle
+                messageBox.innerText = result.message + " Öğrenci paneline yönlendiriliyorsunuz...";
+                document.getElementById('step2Form').style.display = 'none'; 
+                
+                // 2 Saniye sonra dashboard'a yönlendir
+                setTimeout(() => {
+                    window.location.href = '/dashboard.html';
+                }, 2000);
+            }
             } else {
                 messageBox.className = 'error';
                 messageBox.innerText = result.error;
