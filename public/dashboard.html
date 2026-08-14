@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İvme Mentörlük - Öğrenci Paneli</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f3f4f6; color: #1f2937; }
+        
+        /* Üst Menü */
+        .navbar { background-color: #5a4bfa; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .navbar h1 { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .user-profile { display: flex; align-items: center; gap: 10px; font-weight: 500; }
+        .user-profile i { font-size: 24px; }
+
+        /* Ana İçerik Izgarası */
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        
+        /* Kart Tasarımları */
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); transition: transform 0.2s; }
+        .card:hover { transform: translateY(-5px); }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #f3f4f6; padding-bottom: 10px; }
+        .card-header h3 { font-size: 16px; color: #4b5563; }
+        .card-header i { color: #5a4bfa; font-size: 20px; }
+
+        /* Pomodoro Sayacı Özel */
+        .timer-display { font-size: 48px; font-weight: bold; text-align: center; color: #111827; margin: 20px 0; letter-spacing: 2px; }
+        .timer-controls { display: flex; justify-content: center; gap: 10px; }
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.3s; color: white; }
+        .btn-start { background-color: #10b981; }
+        .btn-start:hover { background-color: #059669; }
+        .btn-reset { background-color: #ef4444; }
+        .btn-reset:hover { background-color: #dc2626; }
+
+        /* Görev Listesi Özel */
+        .task-list { list-style: none; }
+        .task-list li { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #e5e7eb; font-size: 15px; }
+        .task-list input[type="checkbox"] { width: 18px; height: 18px; accent-color: #5a4bfa; cursor: pointer; }
+
+        /* Pusula Simülatör Özel */
+        .pusula-btn { width: 100%; padding: 15px; background: linear-gradient(135deg, #5a4bfa, #8b5cf6); color: white; text-align: center; border-radius: 10px; text-decoration: none; display: block; font-weight: bold; margin-top: 15px; transition: opacity 0.3s; }
+        .pusula-btn:hover { opacity: 0.9; }
+        .yok-badge { background: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-left: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <h1><i class="fa-solid fa-rocket"></i> İvme Mentörlük</h1>
+        <div class="user-profile">
+            <span>Hoş Geldin, Öğrenci</span>
+            <i class="fa-solid fa-circle-user"></i>
+        </div>
+    </div>
+
+    <div class="container">
+        
+        <!-- 1. Modül: Pomodoro Sayacı -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Çalışma Sayacı (Pomodoro)</h3>
+                <i class="fa-solid fa-stopwatch"></i>
+            </div>
+            <div class="timer-display" id="time">25:00</div>
+            <div class="timer-controls">
+                <button class="btn btn-start" onclick="startTimer()">Başlat</button>
+                <button class="btn btn-reset" onclick="resetTimer()">Sıfırla</button>
+            </div>
+        </div>
+
+        <!-- 2. Modül: Günlük Görevler -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Günlük Hedefler</h3>
+                <i class="fa-solid fa-list-check"></i>
+            </div>
+            <ul class="task-list">
+                <li><input type="checkbox"> TYT Matematik - 40 Soru Çözümü</li>
+                <li><input type="checkbox"> AYT Fizik - Konu Tekrarı</li>
+                <li><input type="checkbox"> 1 Adet Türkçe Bölüm Denemesi</li>
+                <li><input type="checkbox"> Geometri - Üçgenler 2 Test</li>
+            </ul>
+        </div>
+
+        <!-- 3. Modül: Pusula Tercih Motoru -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Pusula Tercih Simülatörü <span class="yok-badge">YÖK ATLAS Verili</span></h3>
+                <i class="fa-solid fa-compass"></i>
+            </div>
+            <p style="color: #6b7280; font-size: 14px; line-height: 1.5;">Güncel kontenjan formülleri ve sıralama tahmin modelleriyle üniversite tercih listenizi simüle edin.</p>
+            <a href="#" class="pusula-btn"><i class="fa-solid fa-magnifying-glass-chart"></i> Simülatörü Başlat</a>
+        </div>
+
+        <!-- 4. Modül: Net Takibi -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Haftalık Net İvmesi</h3>
+                <i class="fa-solid fa-chart-line"></i>
+            </div>
+            <div style="display: flex; align-items: flex-end; height: 120px; gap: 15px; margin-top: 20px; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;">
+                <div style="width: 25%; background-color: #d1d5db; height: 40%; border-radius: 4px 4px 0 0; position: relative;"><span style="position: absolute; top: -20px; width: 100%; text-align: center; font-size: 12px; font-weight: bold;">55</span></div>
+                <div style="width: 25%; background-color: #9ca3af; height: 55%; border-radius: 4px 4px 0 0; position: relative;"><span style="position: absolute; top: -20px; width: 100%; text-align: center; font-size: 12px; font-weight: bold;">62</span></div>
+                <div style="width: 25%; background-color: #8b5cf6; height: 75%; border-radius: 4px 4px 0 0; position: relative;"><span style="position: absolute; top: -20px; width: 100%; text-align: center; font-size: 12px; font-weight: bold;">75</span></div>
+                <div style="width: 25%; background-color: #5a4bfa; height: 90%; border-radius: 4px 4px 0 0; position: relative;"><span style="position: absolute; top: -20px; width: 100%; text-align: center; font-size: 12px; font-weight: bold;">88</span></div>
+            </div>
+            <p style="text-align: center; margin-top: 10px; font-size: 13px; font-weight: 600; color: #4b5563;">Son 4 TYT Denemesi</p>
+        </div>
+
+    </div>
+
+    <script>
+        // Basit Pomodoro Sayacı JS
+        let timeLeft = 1500; // 25 dakika
+        let timerId = null;
+        
+        function updateDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('time').innerText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        function startTimer() {
+            if (timerId !== null) return;
+            timerId = setInterval(() => {
+                timeLeft--;
+                updateDisplay();
+                if (timeLeft === 0) { clearInterval(timerId); timerId = null; alert('Çalışma süresi bitti, mola zamanı!'); }
+            }, 1000);
+        }
+        
+        function resetTimer() {
+            clearInterval(timerId);
+            timerId = null;
+            timeLeft = 1500;
+            updateDisplay();
+        }
+    </script>
+</body>
+</html>
