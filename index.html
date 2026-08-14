@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kimlik Doğrulama</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f3f4f6; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .container { background-color: #ffffff; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 420px; }
+        h2 { text-align: center; margin-bottom: 30px; color: #111827; font-weight: 600; }
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; margin-bottom: 8px; color: #374151; font-size: 14px; font-weight: 500; }
+        .input-group input { width: 100%; padding: 12px 15px; border: 1px solid #d1d5db; border-radius: 8px; outline: none; font-size: 15px; transition: border-color 0.3s; }
+        .input-group input:focus { border-color: #5a4bfa; box-shadow: 0 0 0 3px rgba(90, 75, 250, 0.1); }
+        
+        /* 2. Aşamadaki kod giriş kutusu için özel tasarım */
+        #verificationCode { text-align: center; font-size: 24px; letter-spacing: 8px; font-weight: bold; color: #111827; }
+        
+        button { width: 100%; padding: 14px; background-color: #5a4bfa; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; transition: background-color 0.3s; margin-top: 10px; }
+        button:hover { background-color: #4839d4; }
+        button:disabled { background-color: #a59dfa; cursor: not-allowed; }
+        #messageBox { margin-top: 20px; padding: 12px; border-radius: 8px; text-align: center; display: none; font-size: 14px; font-weight: 500; }
+        .success { background-color: #def7ec; color: #03543f; }
+        .error { background-color: #fde8e8; color: #9b1c1c; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Kimlik Doğrulama</h2>
+    
+    <!-- 1. AŞAMA: BİLGİ GİRİŞ FORMU -->
+    <form id="step1Form">
+        <div class="input-group">
+            <label for="name">Ad Soyad</label>
+            <input type="text" id="name" required placeholder="Adınızı girin">
+        </div>
+        <div class="input-group">
+            <label for="email">E-posta</label>
+            <input type="email" id="email" required placeholder="ornek@mail.com">
+        </div>
+        <div class="input-group">
+            <label for="phone">Telefon (Uluslararası format)</label>
+            <input type="tel" id="phone" required placeholder="+905xxxxxxxxx">
+        </div>
+        <button type="submit" id="submitBtn">Doğrulama Kodu Gönder</button>
+    </form>
+
+    <!-- 2. AŞAMA: KOD GİRİŞ FORMU (Başlangıçta Gizli) -->
+    <form id="step2Form" style="display: none;">
+        <p style="text-align: center; margin-bottom: 20px; color: #4b5563; font-size: 14px;">E-posta adresinize gönderilen 6 haneli kodu girin.</p>
+        <div class="input-group">
+            <input type="text" id="verificationCode" required placeholder="••••••" maxlength="6" autocomplete="off">
+        </div>
+        <button type="submit" id="verifyBtn">Kodu Doğrula</button>
+    </form>
+
+    <div id="messageBox"></div>
+</div>
+
+<script>
+    let userEmail = ''; // 2. aşamada kodu doğrularken maili bilmemiz gerektiği için hafızada tutuyoruz
+
+    // 1. AŞAMA: KODU GÖNDERME İŞLEMİ
+    document.getElementById('step1Form').addEventListener('submit', async (e) => {
+        e.preventDefault(); 
+        
+        const name = document.getElementById('name').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        userEmail = email; // Maili değişkene kaydet
+        
+        const btn = document.getElementById('submitBtn');
+        const messageBox = document.getElementById('messageBox');
+
+        btn.disabled = true;
+        btn.innerText = 'Gönderiliyor...';
+        messageBox.style.display = 'none';
+
+        try {
+            const response = await fetch('/api/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, phone })
+            });
+
+            const result = await response.json();
+            messageBox.style.display = 'block';
+
+            if (response.ok && result.success) {
+                // BAŞARILI: 1. Adımı gizle, 2. Adımı ekrana getir
+                document.getElementById('step1Form').style.display = 'none';
+                document.getElementById('step2Form').style.display = 'block';
+                
+                messageBox.className = 'success';
+                messageBox.innerText = result.message;
+            } else {
+                messageBox.className = 'error';
+                messageBox.innerText = result.error;
+                btn.disabled = false;
+                btn.innerText = 'Doğrulama Kodu Gönder';
+            }
+        } catch (error) {
+            messageBox.style.display = 'block';
+            messageBox.className = 'error';
+            messageBox.innerText = 'Sunucuya ulaşılamadı.';
+            btn.disabled = false;
+            btn.innerText = 'Doğrulama Kodu Gönder';
+        }
+    });
+
+    // 2. AŞAMA: KODU DOĞRULAMA İŞLEMİ
+    document.getElementById('step2Form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const code = document.getElementById('verificationCode').value.trim();
+        const btn = document.getElementById('verifyBtn');
+        const messageBox = document.getElementById('messageBox');
+
+        btn.disabled = true;
+        btn.innerText = 'Kontrol Ediliyor...';
+
+        try {
+            const response = await fetch('/api/check-code', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: userEmail, code: code }) // E-posta ve Kodu sunucuya yolla
+            });
+
+            const result = await response.json();
+            
+            messageBox.style.display = 'block';
+            if (response.ok && result.success) {
+                messageBox.className = 'success';
+                messageBox.innerText = result.message;
+                document.getElementById('step2Form').style.display = 'none'; // İşlem tamamen bitince formu gizle
+            } else {
+                messageBox.className = 'error';
+                messageBox.innerText = result.error;
+                btn.disabled = false;
+                btn.innerText = 'Kodu Doğrula';
+            }
+        } catch (error) {
+            messageBox.style.display = 'block';
+            messageBox.className = 'error';
+            messageBox.innerText = 'Bağlantı hatası.';
+            btn.disabled = false;
+            btn.innerText = 'Kodu Doğrula';
+        }
+    });
+</script>
+
+</body>
+</html>
