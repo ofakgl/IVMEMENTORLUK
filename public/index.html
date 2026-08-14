@@ -14,7 +14,6 @@
         .input-group input { width: 100%; padding: 12px 15px; border: 1px solid #d1d5db; border-radius: 8px; outline: none; font-size: 15px; transition: border-color 0.3s; }
         .input-group input:focus { border-color: #5a4bfa; box-shadow: 0 0 0 3px rgba(90, 75, 250, 0.1); }
         
-        /* 2. Aşamadaki kod giriş kutusu için özel tasarım */
         #verificationCode { text-align: center; font-size: 24px; letter-spacing: 8px; font-weight: bold; color: #111827; }
         
         button { width: 100%; padding: 14px; background-color: #5a4bfa; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; transition: background-color 0.3s; margin-top: 10px; }
@@ -47,7 +46,7 @@
         <button type="submit" id="submitBtn">Doğrulama Kodu Gönder</button>
     </form>
 
-    <!-- 2. AŞAMA: KOD GİRİŞ FORMU (Başlangıçta Gizli) -->
+    <!-- 2. AŞAMA: KOD GİRİŞ FORMU -->
     <form id="step2Form" style="display: none;">
         <p style="text-align: center; margin-bottom: 20px; color: #4b5563; font-size: 14px;">E-posta adresinize gönderilen 6 haneli kodu girin.</p>
         <div class="input-group">
@@ -60,16 +59,16 @@
 </div>
 
 <script>
-    let userEmail = ''; // 2. aşamada kodu doğrularken maili bilmemiz gerektiği için hafızada tutuyoruz
+    let userEmail = ''; 
 
-    // 1. AŞAMA: KODU GÖNDERME İŞLEMİ
+    // 1. AŞAMA: KODU GÖNDERME
     document.getElementById('step1Form').addEventListener('submit', async (e) => {
         e.preventDefault(); 
         
         const name = document.getElementById('name').value.trim();
         const email = document.getElementById('email').value.trim();
         const phone = document.getElementById('phone').value.trim();
-        userEmail = email; // Maili değişkene kaydet
+        userEmail = email; 
         
         const btn = document.getElementById('submitBtn');
         const messageBox = document.getElementById('messageBox');
@@ -89,10 +88,8 @@
             messageBox.style.display = 'block';
 
             if (response.ok && result.success) {
-                // BAŞARILI: 1. Adımı gizle, 2. Adımı ekrana getir
                 document.getElementById('step1Form').style.display = 'none';
                 document.getElementById('step2Form').style.display = 'block';
-                
                 messageBox.className = 'success';
                 messageBox.innerText = result.message;
             } else {
@@ -110,7 +107,7 @@
         }
     });
 
-    // 2. AŞAMA: KODU DOĞRULAMA İŞLEMİ
+    // 2. AŞAMA: KODU DOĞRULAMA VE PANELE YÖNLENDİRME
     document.getElementById('step2Form').addEventListener('submit', async (e) => {
         e.preventDefault();
         
@@ -125,7 +122,7 @@
             const response = await fetch('/api/check-code', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: userEmail, code: code }) // E-posta ve Kodu sunucuya yolla
+                body: JSON.stringify({ email: userEmail, code: code }) 
             });
 
             const result = await response.json();
@@ -136,11 +133,10 @@
                 messageBox.innerText = result.message + " Öğrenci paneline yönlendiriliyorsunuz...";
                 document.getElementById('step2Form').style.display = 'none'; 
                 
-                // 2 Saniye sonra dashboard'a yönlendir
+                // Onaydan 2 saniye sonra Öğrenci Paneline geçiş yapar
                 setTimeout(() => {
                     window.location.href = '/dashboard.html';
                 }, 2000);
-            }
             } else {
                 messageBox.className = 'error';
                 messageBox.innerText = result.error;
