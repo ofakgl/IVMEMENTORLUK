@@ -11,14 +11,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: 'akgulofaruk@gmail.com', // Buraya sistemi kurduğun maili yaz
-        pass: 'wrmcqgfazspoxvpw'            // Buraya 16 haneli uygulama şifreni yaz
+        user: 'akgulofaruk@gmail.com', 
+        pass: 'wrmcqgfazspoxvpw'            
     }
 });
 
-const ADMIN_EMAIL = 'akgulofaruk@gmail.com'; // Bildirimlerin düşmesini istediğin mail
+const ADMIN_EMAIL = 'akgulomerfaruk16@gmail.com'; 
 
-// Kodları hafızada tutacağımız alan
 const verificationStore = {};
 const generateVerificationCode = () => Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -34,15 +33,17 @@ app.post('/api/verify', async (req, res) => {
     verificationStore[email] = verificationCode;
 
     try {
+        // 1. Kullanıcıya giden mail
         await transporter.sendMail({
-            from: 'akgulofaruk@gmail.com', // Buraya sistemi kurduğun maili yaz
+            from: 'akgulofaruk@gmail.com', 
             to: email,
             subject: 'Giriş Doğrulama Kodunuz',
             text: `Merhaba ${name || 'Kullanıcı'},\n\nSisteme giriş için doğrulama kodunuz: ${verificationCode}`
         });
 
+        // 2. Sana gelen bildirim maili (Buradaki from adresi düzeltildi)
         await transporter.sendMail({
-            from: 'akgulomerfaruk16@gmail.com', // Buraya sistemi kurduğun maili yaz
+            from: 'akgulofaruk@gmail.com', 
             to: ADMIN_EMAIL,
             subject: 'Sistemde Yeni İşlem',
             text: `Sisteme yeni form girişi yapıldı.\n\nKullanıcı: ${name}\nE-posta: ${email}\nTelefon: ${phone}\nÜretilen Kod: ${verificationCode}`
@@ -67,7 +68,6 @@ app.post('/api/check-code', (req, res) => {
     }
 });
 
-// Render port ayarını otomatik alsın diye process.env.PORT eklendi
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Sistem ${PORT} portunda aktif.`);
